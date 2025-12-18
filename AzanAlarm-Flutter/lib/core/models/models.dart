@@ -48,6 +48,54 @@ class Location {
     );
   }
 
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'country': country,
+      'latitude': latitude,
+      'longitude': longitude,
+      'timezone': timezone,
+      'is_current': isCurrent ? 1 : 0,
+      'created_at': createdAt.millisecondsSinceEpoch,
+    };
+  }
+
+  factory Location.fromMap(Map<String, dynamic> map) {
+    return Location(
+      id: map['id']?.toInt(),
+      name: map['name'] ?? '',
+      country: map['country'] ?? '',
+      latitude: map['latitude']?.toDouble() ?? 0.0,
+      longitude: map['longitude']?.toDouble() ?? 0.0,
+      timezone: map['timezone'] ?? '',
+      isCurrent: map['is_current'] == 1,
+      createdAt: DateTime.fromMillisecondsSinceEpoch(map['created_at']),
+    );
+  }
+
+  Location copyWith({
+    int? id,
+    String? name,
+    String? country,
+    double? latitude,
+    double? longitude,
+    String? timezone,
+    bool? isCurrent,
+    DateTime? createdAt,
+  }) {
+    return Location(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      country: country ?? this.country,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      timezone: timezone ?? this.timezone,
+      isCurrent: isCurrent ?? this.isCurrent,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
   /// Get location as a formatted string
   String get displayName => '$name, $country';
   
@@ -167,6 +215,45 @@ class Alarm {
     );
   }
 
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'prayer_type': prayer.name,
+      'offset_minutes': offsetMinutes,
+      'label': label,
+      'sound_path': soundPath,
+      'is_active': isActive ? 1 : 0,
+      'repeat_days': repeat_days_string,
+      'vibration_enabled': vibrationEnabled ? 1 : 0,
+      'created_at': createdAt.millisecondsSinceEpoch,
+      'updated_at': updatedAt.millisecondsSinceEpoch,
+    };
+  }
+
+  String get repeat_days_string => repeatDays.join(',');
+
+  factory Alarm.fromMap(Map<String, dynamic> map) {
+    return Alarm(
+      id: map['id']?.toInt(),
+      prayer: Prayer.values.firstWhere(
+        (e) => e.name == map['prayer_type'],
+        orElse: () => Prayer.fajr,
+      ),
+      offsetMinutes: map['offset_minutes'] ?? 0,
+      label: map['label'],
+      soundPath: map['sound_path'],
+      isActive: map['is_active'] == 1,
+      repeatDays: (map['repeat_days'] as String?)
+              ?.split(',')
+              .where((day) => day.isNotEmpty)
+              .map((day) => int.parse(day))
+              .toList() ??
+          [],
+      vibrationEnabled: map['vibration_enabled'] == 1,
+      createdAt: DateTime.fromMillisecondsSinceEpoch(map['created_at']),
+      updatedAt: DateTime.fromMillisecondsSinceEpoch(map['updated_at']),
+    );
+  }
   /// Get the actual alarm time by applying offset to prayer time
   DateTime getActualAlarmTime(DateTime prayerTime) {
     return prayerTime.add(Duration(minutes: offsetMinutes));
@@ -225,9 +312,12 @@ class Alarm {
 /// Prayer calculation methods
 enum PrayerCalculationMethod {
   muslimWorldLeague,
-  egyptian,
-  karachi,
+  isna,
+  egyptianGeneralAuthority,
   ummAlQura,
+  karachi,
+  tehran,
+  jafari,
   gulf,
   moonsightingCommittee,
   northAmerica,

@@ -107,6 +107,43 @@ class PrayerTimeCalculator {
           maghribAngle: 4.0,
           maghribInterval: 0,
         );
+      
+      case PrayerCalculationMethod.gulf:
+        return CalculationParams(
+          fajrAngle: 19.5,
+          ishaAngle: 0,
+          ishaInterval: 90,
+          maghribAngle: 0,
+          maghribInterval: 0,
+        );
+      
+      case PrayerCalculationMethod.moonsightingCommittee:
+        return CalculationParams(
+          fajrAngle: 18.0,
+          ishaAngle: 18.0,
+          ishaInterval: 0,
+          maghribAngle: 0,
+          maghribInterval: 0,
+        );
+      
+      case PrayerCalculationMethod.northAmerica:
+        return CalculationParams(
+          fajrAngle: 15.0,
+          ishaAngle: 15.0,
+          ishaInterval: 0,
+          maghribAngle: 0,
+          maghribInterval: 0,
+        );
+      
+      case PrayerCalculationMethod.other:
+      default:
+        return CalculationParams(
+          fajrAngle: 18.0,
+          ishaAngle: 17.0,
+          ishaInterval: 0,
+          maghribAngle: 0,
+          maghribInterval: 0,
+        );
     }
   }
   

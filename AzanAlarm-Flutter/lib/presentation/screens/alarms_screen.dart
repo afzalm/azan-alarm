@@ -30,7 +30,7 @@ class AlarmsScreen extends ConsumerWidget {
             ? _buildEmptyState(context)
             : _buildAlarmsList(context, ref, alarms),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => _buildErrorState(context, error),
+        error: (error, stack) => _buildErrorState(context, ref, error),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.push('/create-alarm'),
@@ -92,12 +92,8 @@ class AlarmsScreen extends ConsumerWidget {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      child: SwitchListTile(
-        value: alarm.isActive,
-        onChanged: (value) {
-          ref.read(alarmManagerProvider).toggleAlarm(alarm.id!, value);
-        },
-        secondary: CircleAvatar(
+      child: ListTile(
+        leading: CircleAvatar(
           backgroundColor: colorScheme.getPrayerColor(alarm.prayer),
           child: Icon(
             _getPrayerIcon(alarm.prayer),
@@ -121,6 +117,7 @@ class AlarmsScreen extends ConsumerWidget {
           children: [
             if (alarm.label != null && alarm.label!.isNotEmpty)
               Container(
+                margin: const EdgeInsets.only(right: 8),
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: colorScheme.secondaryContainer,
@@ -133,6 +130,12 @@ class AlarmsScreen extends ConsumerWidget {
                   ),
                 ),
               ),
+            Switch(
+              value: alarm.isActive,
+              onChanged: (value) {
+                ref.read(alarmManagerProvider).toggleAlarm(alarm.id!, value);
+              },
+            ),
             IconButton(
               icon: const Icon(Icons.more_vert),
               onPressed: () => _showAlarmOptions(context, ref, alarm),
@@ -143,7 +146,7 @@ class AlarmsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildErrorState(BuildContext context, Object error) {
+  Widget _buildErrorState(BuildContext context, WidgetRef ref, Object error) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

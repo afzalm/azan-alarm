@@ -1,8 +1,9 @@
 /// Core services for the AzanAlarm application
 
 import 'dart:async';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
+import 'package:geocoding/geocoding.dart' hide Location;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart'
     as flutter_local_notifications;
@@ -22,18 +23,36 @@ class LocationService {
 
   /// Check if location permission is granted
   Future<bool> hasLocationPermission() async {
+    if (kIsWeb) return true; // Always return true for Web mock
     final permission = await Permission.location.status;
     return permission.isGranted;
   }
 
   /// Request location permission
   Future<bool> requestLocationPermission() async {
+    if (kIsWeb) return true; // Always return true for Web mock
     final permission = await Permission.location.request();
     return permission.isGranted;
   }
 
   /// Get current device location
   Future<Location?> getCurrentLocation() async {
+    if (kIsWeb) {
+      // Mock location for Web (e.g., Mecca) or return null to let provider use default
+      // Returning null here so the provider logic kicks in and uses Mecca default
+      // wrapped in Location object.
+      // Actually, let's return a web-specific location to differentiate.
+      return Location(
+        name: 'Web Location (Mecca)',
+        country: 'Saudi Arabia',
+        latitude: 21.4225,
+        longitude: 39.8262,
+        timezone: 'Asia/Riyadh',
+        isCurrent: true,
+        createdAt: DateTime.now(),
+      );
+    }
+
     try {
       // Check permission first
       if (!await hasLocationPermission()) {
@@ -84,6 +103,7 @@ class LocationService {
   /// Search for locations by query
   Future<List<Location>> searchLocations(String query) async {
     if (query.isEmpty) return [];
+    if (kIsWeb) return []; // Mock empty search on Web
 
     try {
       final locations = await locationFromAddress(query);
@@ -106,7 +126,7 @@ class LocationService {
           );
           
           results.add(Location(
-            name: location.locality ?? location.subLocality ?? location.name ?? query,
+            name: placemark.locality ?? placemark.subLocality ?? query,
             country: placemark.country ?? 'Unknown',
             latitude: location.latitude,
             longitude: location.longitude,
@@ -130,8 +150,8 @@ class LocationService {
 
   /// Set current location
   Future<void> setCurrentLocation(Location location) async {
-    location.isCurrent = true;
-    await saveLocation(location);
+    final updatedLocation = location.copyWith(isCurrent: true);
+    await saveLocation(updatedLocation);
   }
 
   /// Get current saved location
@@ -231,7 +251,7 @@ class PrayerTimesService {
     
     for (final entry in prayerTimes.entries) {
       if (entry.value.isAfter(now)) {
-        return entry.prayer;
+        return entry.key;
       }
     }
     
@@ -263,7 +283,7 @@ class SettingsService {
         return const AppSettings();
       }
       
-      return AppSettingsExtension.fromStorageMap(settingsMap);
+      return AppSettings.fromStorageMap(settingsMap);
     } catch (e) {
       print('Error loading settings: $e');
       return const AppSettings();
@@ -496,6 +516,11 @@ class NotificationService {
   /// Initialize notification service
   Future<void> initialize() async {
     if (_initialized) return;
+    if (kIsWeb) {
+      _initialized = true;
+      return;
+    }
+    
     try {
       tzdata.initializeTimeZones();
     } catch (_) {}
@@ -512,6 +537,8 @@ class NotificationService {
 
   /// Request notification permissions
   Future<bool> requestPermissions() async {
+    if (kIsWeb) return true; // Always return true for Web mock of permissions
+    
     final status = await Permission.notification.request();
     final androidGranted = status.isGranted;
     final iosGranted = await _fln
@@ -522,6 +549,7 @@ class NotificationService {
 
   /// Check if notification permissions are granted
   Future<bool> arePermissionsGranted() async {
+    if (kIsWeb) return true; // Always return true for Web mock
     final status = await Permission.notification.status;
     return status.isGranted;
   }
@@ -541,6 +569,10 @@ class NotificationService {
 
   /// Show prayer time notification immediately
   Future<void> showPrayerNotification(Prayer prayer, DateTime time) async {
+    if (kIsWeb) {
+      print('Web Notification: Prayer Time: ${prayer.displayName}');
+      return;
+    }
     await _fln.show(
       _hashId('prayer-${prayer.name}-${time.millisecondsSinceEpoch}'),
       'Prayer Time: ${prayer.displayName}',
@@ -551,6 +583,10 @@ class NotificationService {
 
   /// Show alarm notification immediately
   Future<void> showAlarmNotification(Alarm alarm) async {
+    if (kIsWeb) {
+      print('Web Notification: Alarm: ${alarm.displayLabel}');
+      return;
+    }
     await _fln.show(
       _hashId('alarm-${alarm.id ?? alarm.displayLabel}-${DateTime.now().millisecondsSinceEpoch}'),
       'Azan Alarm',
@@ -566,6 +602,10 @@ class NotificationService {
     String? channelId,
     int? id,
   }) async {
+    if (kIsWeb) {
+      print('Web Notification: $title - $body');
+      return;
+    }
     await _fln.show(id ?? _hashId('now-$title-$body'), title, body, _defaultDetails());
   }
 
@@ -577,6 +617,11 @@ class NotificationService {
     String payload = '',
     int? id,
   }) async {
+    if (kIsWeb) {
+      print('Web Notification Scheduled at $time: $title - $body');
+      return;
+    }
+    
     await initialize();
     final granted = await arePermissionsGranted();
     if (!granted) {
@@ -598,11 +643,13 @@ class NotificationService {
 
   /// Cancel notification
   Future<void> cancelNotification(int id) async {
+    if (kIsWeb) return;
     await _fln.cancel(id);
   }
 
   /// Cancel all notifications
   Future<void> cancelAllNotifications() async {
+    if (kIsWeb) return;
     await _fln.cancelAll();
   }
 

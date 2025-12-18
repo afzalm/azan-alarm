@@ -1,6 +1,7 @@
 /// Database service for managing SQLite database operations
 
 import 'dart:async';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../constants/app_constants.dart';
@@ -16,6 +17,7 @@ class DatabaseService {
   
   /// Get database instance
   Future<Database> get database async {
+    if (kIsWeb) return Future.error('Database not supported on Web');
     _database ??= await _initDatabase();
     return _database!;
   }
@@ -127,6 +129,7 @@ class LocationDatabase {
   
   /// Insert or update location
   static Future<int> insertOrUpdate(Location location) async {
+    if (kIsWeb) return 1; // Mock success
     final db = await DatabaseService().database;
     
     // First, set all locations to not current
@@ -151,6 +154,7 @@ class LocationDatabase {
   
   /// Get current location
   static Future<Location?> getCurrentLocation() async {
+    if (kIsWeb) return null; // Mock no saved location
     final db = await DatabaseService().database;
     final maps = await db.query(
       _tableName,
@@ -167,6 +171,7 @@ class LocationDatabase {
   
   /// Get all saved locations
   static Future<List<Location>> getAllLocations() async {
+    if (kIsWeb) return []; // Mock empty list
     final db = await DatabaseService().database;
     final maps = await db.query(
       _tableName,
@@ -178,6 +183,7 @@ class LocationDatabase {
   
   /// Delete location
   static Future<int> deleteLocation(int id) async {
+    if (kIsWeb) return 1; // Mock success
     final db = await DatabaseService().database;
     return await db.delete(
       _tableName,
@@ -188,6 +194,7 @@ class LocationDatabase {
   
   /// Search locations by name or country
   static Future<List<Location>> searchLocations(String query) async {
+    if (kIsWeb) return []; // Mock empty list
     final db = await DatabaseService().database;
     final maps = await db.query(
       _tableName,
@@ -206,6 +213,7 @@ class AlarmDatabase {
   
   /// Insert alarm
   static Future<int> insert(Alarm alarm) async {
+    if (kIsWeb) return 1; // Mock success
     final db = await DatabaseService().database;
     final id = await db.insert(_tableName, alarm.toMap());
     return id.toInt();
@@ -213,6 +221,7 @@ class AlarmDatabase {
   
   /// Update alarm
   static Future<int> update(Alarm alarm) async {
+    if (kIsWeb) return 1; // Mock success
     final db = await DatabaseService().database;
     return await db.update(
       _tableName,
@@ -224,6 +233,7 @@ class AlarmDatabase {
   
   /// Delete alarm
   static Future<int> delete(int id) async {
+    if (kIsWeb) return 1; // Mock success
     final db = await DatabaseService().database;
     return await db.delete(
       _tableName,
@@ -234,6 +244,7 @@ class AlarmDatabase {
   
   /// Get all alarms
   static Future<List<Alarm>> getAllAlarms() async {
+    if (kIsWeb) return []; // Mock empty list
     final db = await DatabaseService().database;
     final maps = await db.query(
       _tableName,
@@ -245,6 +256,7 @@ class AlarmDatabase {
   
   /// Get active alarms
   static Future<List<Alarm>> getActiveAlarms() async {
+    if (kIsWeb) return []; // Mock empty list
     final db = await DatabaseService().database;
     final maps = await db.query(
       _tableName,
@@ -258,6 +270,7 @@ class AlarmDatabase {
   
   /// Toggle alarm active status
   static Future<int> toggleAlarm(int id, bool isActive) async {
+    if (kIsWeb) return 1; // Mock success
     final db = await DatabaseService().database;
     return await db.update(
       _tableName,
@@ -274,6 +287,7 @@ class SettingsDatabase {
   
   /// Save setting
   static Future<void> saveSetting(String key, String value) async {
+    if (kIsWeb) return; // Mock success
     final db = await DatabaseService().database;
     final now = DateTime.now().millisecondsSinceEpoch;
     
@@ -290,6 +304,7 @@ class SettingsDatabase {
   
   /// Get setting value
   static Future<String?> getSetting(String key) async {
+    if (kIsWeb) return null; // Mock no setting
     final db = await DatabaseService().database;
     final maps = await db.query(
       _tableName,
@@ -306,6 +321,7 @@ class SettingsDatabase {
   
   /// Get all settings as map
   static Future<Map<String, String>> getAllSettings() async {
+    if (kIsWeb) return {}; // Mock empty map
     final db = await DatabaseService().database;
     final maps = await db.query(_tableName);
     
@@ -318,71 +334,3 @@ class SettingsDatabase {
   }
 }
 
-/// Extension methods for model serialization
-extension LocationDatabaseExtension on Location {
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'name': name,
-      'country': country,
-      'latitude': latitude,
-      'longitude': longitude,
-      'timezone': timezone,
-      'is_current': isCurrent ? 1 : 0,
-      'created_at': createdAt.millisecondsSinceEpoch,
-    };
-  }
-
-  factory Location.fromMap(Map<String, dynamic> map) {
-    return Location(
-      id: map['id']?.toInt(),
-      name: map['name'] ?? '',
-      country: map['country'] ?? '',
-      latitude: map['latitude']?.toDouble() ?? 0.0,
-      longitude: map['longitude']?.toDouble() ?? 0.0,
-      timezone: map['timezone'] ?? '',
-      isCurrent: map['is_current'] == 1,
-      createdAt: DateTime.fromMillisecondsSinceEpoch(map['created_at']),
-    );
-  }
-}
-
-extension AlarmDatabaseExtension on Alarm {
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'prayer_type': prayer.name,
-      'offset_minutes': offsetMinutes,
-      'label': label,
-      'sound_path': soundPath,
-      'is_active': isActive ? 1 : 0,
-      'repeat_days': repeatDays.join(','),
-      'vibration_enabled': vibrationEnabled ? 1 : 0,
-      'created_at': createdAt.millisecondsSinceEpoch,
-      'updated_at': updatedAt.millisecondsSinceEpoch,
-    };
-  }
-
-  factory Alarm.fromMap(Map<String, dynamic> map) {
-    return Alarm(
-      id: map['id']?.toInt(),
-      prayer: Prayer.values.firstWhere(
-        (e) => e.name == map['prayer_type'],
-        orElse: () => Prayer.fajr,
-      ),
-      offsetMinutes: map['offset_minutes'] ?? 0,
-      label: map['label'],
-      soundPath: map['sound_path'],
-      isActive: map['is_active'] == 1,
-      repeatDays: (map['repeat_days'] as String?)
-              ?.split(',')
-              .where((day) => day.isNotEmpty)
-              .map((day) => int.parse(day))
-              .toList() ??
-          [],
-      vibrationEnabled: map['vibration_enabled'] == 1,
-      createdAt: DateTime.fromMillisecondsSinceEpoch(map['created_at']),
-      updatedAt: DateTime.fromMillisecondsSinceEpoch(map['updated_at']),
-    );
-  }
-}

@@ -1,5 +1,6 @@
 /// Riverpod providers for state management
 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/models.dart';
 import '../services/services.dart';
@@ -38,7 +39,20 @@ final databaseServiceProvider = Provider<DatabaseService>((ref) {
 /// Current location provider
 final currentLocationProvider = FutureProvider<Location?>((ref) async {
   final locationService = ref.watch(locationServiceProvider);
-  return await locationService.getCurrentSavedLocation();
+  final savedLocation = await locationService.getCurrentSavedLocation();
+  
+  if (savedLocation != null) return savedLocation;
+  
+  // Default location: Mecca
+  return Location(
+    name: 'Mecca',
+    country: 'Saudi Arabia',
+    latitude: 21.4225,
+    longitude: 39.8262,
+    timezone: 'Asia/Riyadh',
+    isCurrent: true,
+    createdAt: DateTime.now(),
+  );
 });
 
 /// Current app settings provider

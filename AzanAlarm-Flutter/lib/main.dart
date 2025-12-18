@@ -4,8 +4,13 @@ import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/constants/app_constants.dart';
 
+import 'package:timezone/data/latest_all.dart' as tzdata;
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize timezone data
+  tzdata.initializeTimeZones();
   
   runApp(
     const ProviderScope(
