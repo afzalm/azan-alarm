@@ -12,6 +12,7 @@ import '../models/models.dart';
 import '../database/database_service.dart';
 import '../constants/app_constants.dart';
 import 'prayer_time_calculator.dart';
+import 'timezone_helper.dart';
 
 /// Location service for handling GPS and location operations
 class LocationService {
@@ -54,12 +55,19 @@ class LocationService {
 
       if (placemarks.isNotEmpty) {
         final placemark = placemarks.first;
+        
+        // Detect timezone from coordinates
+        final detectedTimezone = TimezoneHelper.detectTimezoneFromCoordinates(
+          position.latitude,
+          position.longitude,
+        );
+        
         final location = Location(
           name: placemark.locality ?? placemark.subLocality ?? 'Unknown',
           country: placemark.country ?? 'Unknown',
           latitude: position.latitude,
           longitude: position.longitude,
-          timezone: 'UTC', // TODO: Get actual timezone
+          timezone: detectedTimezone ?? 'UTC',
           createdAt: DateTime.now(),
         );
 
@@ -90,12 +98,19 @@ class LocationService {
 
         if (placemarks.isNotEmpty) {
           final placemark = placemarks.first;
+          
+          // Detect timezone from coordinates
+          final detectedTimezone = TimezoneHelper.detectTimezoneFromCoordinates(
+            location.latitude,
+            location.longitude,
+          );
+          
           results.add(Location(
             name: location.locality ?? location.subLocality ?? location.name ?? query,
             country: placemark.country ?? 'Unknown',
             latitude: location.latitude,
             longitude: location.longitude,
-            timezone: 'UTC', // TODO: Get actual timezone
+            timezone: detectedTimezone ?? 'UTC',
             createdAt: DateTime.now(),
           ));
         }
@@ -161,8 +176,11 @@ class PrayerTimesService {
   ) async {
     try {
       // Calculate timezone offset from UTC
-      // For now, use local timezone offset
-      final timezoneOffset = date.timeZoneOffset.inHours.toDouble();
+      // Use the location's timezone if available, otherwise use local timezone
+      final timezoneOffset = TimezoneHelper.getTimezoneOffset(
+        date,
+        timezoneName: location.timezone != 'UTC' ? location.timezone : null,
+      );
       
       // Calculate prayer times using astronomical formulas
       final times = _calculator.calculate(
