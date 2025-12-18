@@ -1,0 +1,116 @@
+# Flutter/Dart
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+build/
+**/build/
+**/doc/api/
+
+# Generated artifacts
+generated_plugin_registrant.dart
+app.*.symbols
+app.*.map.json
+coverage/
+
+# Local Flutter SDK cache
+flutter/
+flutter.zip
+
+# Archives (keep these out of git)
+*.zip
+*.7z
+*.rar
+*.tar
+*.tar.gz
+*.tgz
+*.tar.bz2
+*.tbz
+*.tar.xz
+*.txz
+*.gz
+*.bz2
+*.xz
+*.zst
+
+# Android
+.gradle/
+android/.gradle/
+android/local.properties
+android/**/generated/
+android/app/build/
+android/app/debug/
+android/app/profile/
+android/app/release/
+android/key.properties
+*.keystore
+*.jks
+
+# Android build outputs
+*.apk
+*.aab
+
+# iOS/macOS
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/ephemeral/
+ios/.symlinks/
+ios/Pods/
+macos/Flutter/ephemeral/
+DerivedData/
+xcuserdata/
+*.xcuserstate
+*.hmap
+
+# iOS/macOS build outputs
+*.ipa
+*.dSYM
+*.dSYM.zip
+*.xcarchive
+
+# Windows/Linux
+windows/flutter/ephemeral/
+linux/flutter/ephemeral/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.vs/
+
+# OS junk
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Temp files
+*.tmp
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# Local env/config
+.env
+.env.*
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Native build artifacts / binaries
+*.class
+*.o
+*.obj
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
