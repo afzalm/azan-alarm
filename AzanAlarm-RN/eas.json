@@ -1,0 +1,44 @@
+{
+  "cli": {
+    "version": ">= 16.28.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "base": {
+      "android": {
+        "image": "latest"
+      }
+    },
+    "development": {
+      "extends": "base",
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EAS_BUILD": "true"
+      }
+    },
+    "preview": {
+      "extends": "base",
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EAS_BUILD": "true"
+      }
+    },
+    "production": {
+      "extends": "base",
+      "autoIncrement": true,
+      "env": {
+        "EAS_BUILD": "true"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

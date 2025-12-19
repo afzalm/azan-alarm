@@ -1,4 +1,9 @@
 {
   "name": "AzanAlarm",
-  "displayName": "AzanAlarm"
+  "displayName": "AzanAlarm",
+  "extra": {
+    "eas": {
+      "projectId": "0f9d648a-d83a-460b-bbaf-a20b697def15"
+    }
+  }
 }
