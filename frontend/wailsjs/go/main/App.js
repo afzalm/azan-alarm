@@ -66,8 +66,16 @@ export function GetTodayPrayerTimes() {
   return window['go']['main']['App']['GetTodayPrayerTimes']();
 }
 
+export function HideWindow() {
+  return window['go']['main']['App']['HideWindow']();
+}
+
 export function ParseFloat(arg1) {
   return window['go']['main']['App']['ParseFloat'](arg1);
+}
+
+export function Quit() {
+  return window['go']['main']['App']['Quit']();
 }
 
 export function ResetSettingsToDefaults() {
@@ -86,8 +94,16 @@ export function SearchLocations(arg1) {
   return window['go']['main']['App']['SearchLocations'](arg1);
 }
 
+export function SendNotification(arg1, arg2) {
+  return window['go']['main']['App']['SendNotification'](arg1, arg2);
+}
+
 export function SetCurrentLocation(arg1) {
   return window['go']['main']['App']['SetCurrentLocation'](arg1);
+}
+
+export function ShowWindow() {
+  return window['go']['main']['App']['ShowWindow']();
 }
 
 export function ToggleAlarm(arg1, arg2) {

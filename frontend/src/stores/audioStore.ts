@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { usePrayerStore } from './prayerStore'
 import { useAlarmStore } from './alarmStore'
 import { useSettingsStore } from './settingsStore'
+import { SendNotification } from '../../wailsjs/go/main/App'
 
 
 export const useAudioStore = defineStore('audio', () => {
@@ -16,16 +17,10 @@ export const useAudioStore = defineStore('audio', () => {
     let gainNode: GainNode | null = null
 
     function init() {
-        // Initialize audio player
-        // Note: User must provide the file. If missing, this might fail or be silent.
-        // We use the imported URL which Vite handles.
-        audioPlayer.value = new Audio(adhanSound)
-
-        audioPlayer.value.addEventListener('ended', () => {
-            isPlaying.value = false
-        })
-
         startScheduler()
+        // Check initial permission status
+        // We don't request immediately on load to avoid being annoying,
+        // but we check status. Permission is requested in triggerAlarm.
     }
 
     function startScheduler() {
@@ -66,7 +61,7 @@ export const useAudioStore = defineStore('audio', () => {
                 const pFormatted = formatTimeForComparison(pDate)
 
                 if (currentFormatted === pFormatted) {
-                    playAudio()
+                    playBeep()
                     lastPlayedMinute.value = currentTimeStr
                     return
                 }
@@ -93,7 +88,7 @@ export const useAudioStore = defineStore('audio', () => {
             const currentFormatted = formatTimeForComparison(now)
 
             if (currentFormatted === alarmFormatted) {
-                playAudio()
+                playBeep()
                 lastPlayedMinute.value = currentTimeStr
                 return
             }
@@ -128,23 +123,27 @@ export const useAudioStore = defineStore('audio', () => {
 
     function sendNotification(title: string, body: string) {
         console.log("Sending notification:", title)
-        if (!('Notification' in window)) {
-            console.warn("Notifications not supported in this browser")
-            return
+
+        // 1. Try Native Notification via Wails
+        try {
+            SendNotification(title, body)
+        } catch (e) {
+            console.error("Failed to send native notification:", e)
         }
 
-        if (Notification.permission === 'granted') {
-            try {
-                new Notification(title, {
-                    body: body,
-                    icon: '/appicon.png',
-                    requireInteraction: true
-                })
-            } catch (e) {
-                console.error("Error creating notification object:", e)
+        // 2. Fallback/Support for HTML5 Notification (useful if app is focused or proper OS integration missing)
+        if ('Notification' in window) {
+            if (Notification.permission === 'granted') {
+                try {
+                    new Notification(title, {
+                        body: body,
+                        icon: '/appicon.png',
+                        requireInteraction: true
+                    })
+                } catch (e) {
+                    console.error("Error creating HTML5 notification object:", e)
+                }
             }
-        } else {
-            console.warn("Notification permission not granted:", Notification.permission)
         }
     }
 
@@ -215,11 +214,7 @@ export const useAudioStore = defineStore('audio', () => {
     }
 
     function stopAudio() {
-        if (!audioPlayer.value) return
-
-        audioPlayer.value.pause()
-        audioPlayer.value.currentTime = 0
-        isPlaying.value = false
+        cancelAudio()
     }
 
     return {

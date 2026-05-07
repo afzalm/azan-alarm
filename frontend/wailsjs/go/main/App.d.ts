@@ -34,7 +34,11 @@ export function GetSettings():Promise<models.AppSettings>;
 
 export function GetTodayPrayerTimes():Promise<models.PrayerTimes>;
 
+export function HideWindow():Promise<void>;
+
 export function ParseFloat(arg1:string):Promise<number>;
+
+export function Quit():Promise<void>;
 
 export function ResetSettingsToDefaults():Promise<void>;
 
@@ -44,7 +48,11 @@ export function SaveSettings(arg1:models.AppSettings):Promise<void>;
 
 export function SearchLocations(arg1:string):Promise<Array<models.Location>>;
 
+export function SendNotification(arg1:string,arg2:string):Promise<void>;
+
 export function SetCurrentLocation(arg1:models.Location):Promise<void>;
+
+export function ShowWindow():Promise<void>;
 
 export function ToggleAlarm(arg1:number,arg2:boolean):Promise<void>;
 

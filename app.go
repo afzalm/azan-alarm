@@ -8,6 +8,9 @@ import (
 
 	"AzanAlarm/internal/models"
 	"AzanAlarm/internal/services"
+
+	"github.com/gen2brain/beeep"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 // App struct
@@ -282,4 +285,29 @@ func (a *App) FormatTime(timeStr string, is24Hour bool) string {
 func (a *App) ParseFloat(s string) float64 {
 	f, _ := strconv.ParseFloat(s, 64)
 	return f
+}
+
+// ============================================================
+// Native System Methods
+// ============================================================
+
+// SendNotification sends a native desktop notification
+func (a *App) SendNotification(title, message string) error {
+	// appicon.png should be in the build folder or bundled
+	return beeep.Notify(title, message, "")
+}
+
+// HideWindow hides the application window
+func (a *App) HideWindow() {
+	runtime.WindowHide(a.ctx)
+}
+
+// ShowWindow shows the application window
+func (a *App) ShowWindow() {
+	runtime.WindowShow(a.ctx)
+}
+
+// Quit quits the application
+func (a *App) Quit() {
+	runtime.Quit(a.ctx)
 }
